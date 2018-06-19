@@ -1,0 +1,107 @@
+[
+  {
+    "tnsname": "dca01-c01-cdb01",
+    "sequence_offset": "2",
+    "name": "cdb1",
+    "versions": [],
+    "ipaddress": "10.62.19.188",
+    "hostname": "10.62.19.188",
+    "pop": "1",
+    "port": "1521",
+    "instance_name": "cdb1",
+    "location": "ams02",
+    "service_name": "cdb1",
+    "pod": "0",
+    "location_id": "11",
+    "database_read_only": "0",
+    "unit": "1",
+    "users": {
+      "xadmin": {
+        "name": "xadmin",
+        "pass": "xadmin"
+      },
+      "ads": {
+        "name": "cgud",
+        "pass": "cgud"
+      },
+      "zportal": {
+        "name": "cgud",
+        "pass": "cgud"
+      },
+      "xportal": {
+        "name": "xadmin",
+        "pass": "xadmin"
+      }
+    }
+  },
+  {
+    "tnsname": "dca02-c01-cdb01",
+    "sequence_offset": "3",
+    "name": "cdb2",
+    "versions": [],
+    "ipaddress": "10.62.19.191",
+    "hostname": "10.62.19.191",
+    "pop": "2",
+    "port": "1521",
+    "instance_name": "cdb2",
+    "location": "ams02",
+    "service_name": "cdb2",
+    "pod": "0",
+    "location_id": "12",
+    "database_read_only": "1",
+    "unit": "2",
+    "users": {
+      "xadmin": {
+        "name": "xadmin",
+        "pass": "xadmin"
+      },
+      "ads": {
+        "name": "cgud",
+        "pass": "cgud"
+      },
+      "zportal": {
+        "name": "cgud",
+        "pass": "cgud"
+      },
+      "xportal": {
+        "name": "xadmin",
+        "pass": "xadmin"
+      }
+    }
+  },
+  {
+    "tnsname": "cdb3",
+    "sequence_offset": "4",
+    "name": "cdb3",
+    "versions": [],
+    "ipaddress": "",
+    "hostname": "",
+    "pop": "3",
+    "port": "1521",
+    "instance_name": "cdb3",
+    "location": "aws11",
+    "service_name": "cdb3",
+    "pod": "0",
+    "location_id": "13",
+    "database_read_only": "1",
+    "unit": "3",
+    "users": {
+      "xadmin": {
+        "name": "xadmin",
+        "pass": "xadmin"
+      },
+      "ads": {
+        "name": "cgud",
+        "pass": "cgud"
+      },
+      "zportal": {
+        "name": "cgud",
+        "pass": "cgud"
+      },
+      "xportal": {
+        "name": "xadmin",
+        "pass": "xadmin"
+      }
+    }
+  }
+]
