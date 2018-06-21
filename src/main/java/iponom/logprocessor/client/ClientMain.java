@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static iponom.logprocessor.Utils.PREFIX;
+
 /**
  *
  * @author Ilya.Ponomarev
@@ -16,7 +18,7 @@ import java.util.stream.Stream;
 public class ClientMain {
 
     private static final String SEP = ";";
-    private static final String PATH = "2018-06-18-2/result/";
+    private static final String PATH = PREFIX + "result/";
 
     public static void main(String[] args) throws IOException {
         Stream<String> result = navigate(Paths.get(PATH));

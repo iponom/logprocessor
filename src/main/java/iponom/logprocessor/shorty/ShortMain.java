@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static iponom.logprocessor.Utils.PREFIX;
 import static iponom.logprocessor.Utils.isLong;
 
 /**
@@ -49,7 +50,7 @@ public class ShortMain {
         }
     }
 
-    private static final String PATH = "2018-06-18-2/log/";
+    private static final String PATH = PREFIX + "log/";
 
     /*
     0 node
@@ -62,11 +63,11 @@ public class ShortMain {
         Container client = processFile("client.log", 90, 2000, 1000, 500, 200);
         Container server = new Container("service");
         for (int i = 1; i < 4; i++) {
-            server = Container.combine(server, processFile("SERVICE-" + i + ".log", 30, 2000, 1000, 500, 200));
+            server = Container.combine(server, processFile("SERVICE-" + i + ".log", 30, 1000, 500, 200));
         }
         Container storage = new Container("storage");
         for (int i = 1; i < 10; i++) {
-            storage = Container.combine(storage, processFile("STORAGE-" + i + ".log", 10, 200, 100, 50, 10));
+            storage = Container.combine(storage, processFile("STORAGE-" + i + ".log", 10, 500, 200, 100));
         }
         long execTime = client.getExecTime() / 1000;
         client.print();
@@ -83,7 +84,8 @@ public class ShortMain {
         Path path = Paths.get(PATH + logFile);
         try (Stream<String> stream = Files.lines(path)) {
             List<Long> list = stream.map(s -> s.split(","))
-                    .filter(arr -> arr.length == 5 && isLong(arr[3]) && isLong(arr[4]))
+                    .filter(arr -> isLong(arr[3]) && isLong(arr[4])) //arr.length == 6 &&
+                    .filter(arr -> arr.length == 5 || "1".equals(arr[5]))
                     .map(arr -> new Long(arr[4]))
                     .sorted(Comparator.comparing(s -> (-s))).collect(Collectors.toList());
             container.count = list.size();

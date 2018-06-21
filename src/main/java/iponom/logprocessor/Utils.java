@@ -6,6 +6,8 @@ package iponom.logprocessor;
  */
 public interface Utils {
 
+    String PREFIX = "/";
+
     static boolean isLong(String str) {
         try {
             Long.parseLong(str);
