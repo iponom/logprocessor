@@ -60,48 +60,51 @@ public class ShortMain {
      */
 
     public static void main(String[] args) throws Exception {
-        Container client = processFile("client.log", 90, 2000, 1000, 500, 200);
+        Container client = processFile("client.log", 2000, 1500, 1000, 500, 200);
         Container server = new Container("service");
         for (int i = 1; i < 4; i++) {
-            server = Container.combine(server, processFile("SERVICE-" + i + ".log", 30, 1000, 500, 200));
+            server = Container.combine(server, processFile("SERVICE-" + i + ".log", 1000, 500, 200));
         }
         Container storage = new Container("storage");
         for (int i = 1; i < 10; i++) {
-            storage = Container.combine(storage, processFile("STORAGE-" + i + ".log", 10, 500, 200, 100));
+            storage = Container.combine(storage, processFile("STORAGE-" + i + ".log", 700, 500, 200));
         }
-        long execTime = client.getExecTime() / 1000;
-        client.print();
-        server.print();
-        storage.print();
-        System.out.println("=======================================");
-        System.out.println((execTime / 60) + " minutes execution time");
-        System.out.println((client.count / execTime) + " update calls per second");
+        //client.print();
+        //server.print();
+        //storage.print();
+        //long execTime = client.getExecTime() / 1000;
+        //System.out.println("=======================================");
+        //System.out.println((execTime / 60) + " minutes execution time");
+        //System.out.println((client.count / execTime) + " update calls per second");
     }
 
-    private static Container processFile(String logFile, int count, long... intervals) throws Exception {
+    private static Container processFile(String logFile, long... intervals) throws Exception {
         Container container = new Container("client");
         System.out.println("=========== " + logFile + "==============");
         Path path = Paths.get(PATH + logFile);
         try (Stream<String> stream = Files.lines(path)) {
-            List<Long> list = stream.map(s -> s.split(","))
-                    .filter(arr -> isLong(arr[3]) && isLong(arr[4])) //arr.length == 6 &&
-                    .filter(arr -> arr.length == 5 || "1".equals(arr[5]))
+            List<Long> list = stream
+                    .skip(2000) // TODO remove ?
+                    .map(s -> s.split(","))
+                    .filter(arr -> arr.length == 6 && "1".equals(arr[5]) && isLong(arr[3]) && isLong(arr[4]) && new Long(arr[4]) > 200) //arr.length == 6 &&
                     .map(arr -> new Long(arr[4]))
-                    .sorted(Comparator.comparing(s -> (-s))).collect(Collectors.toList());
-            container.count = list.size();
-            container.time = list.stream().collect(Collectors.summingLong(Long::longValue)) / 1000;
+                    //.sorted(Comparator.comparing(s -> (-s)))
+                    .collect(Collectors.toList());
+            //System.out.println("list created");
+            //container.count = list.size();
+            //container.time = list.stream().collect(Collectors.summingLong(Long::longValue)) / 1000;
             for (long interval: intervals) {
                 System.out.println(list.stream().filter(s -> s > interval).count() + " more then " + interval + " ms");
             }
             //print longest intervals
             //list.stream().limit(count).forEach(s -> System.out.println("" + s));
 
-            try (Stream<String> stream2 = Files.lines(path)) {
-                container.firstLine = stream2.findFirst().get();
-            }
-            try (Stream<String> stream3 = Files.lines(path)) {
-                container.lastLine = stream3.skip(container.count - 1).findFirst().get();
-            }
+//            try (Stream<String> stream2 = Files.lines(path)) {
+//                container.firstLine = stream2.findFirst().get();
+//            }
+//            try (Stream<String> stream3 = Files.lines(path)) {
+//                container.lastLine = stream3.skip(container.count - 1).findFirst().get();
+//            }
 
             return container;
         }

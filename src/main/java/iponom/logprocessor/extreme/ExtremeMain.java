@@ -60,6 +60,7 @@ public class ExtremeMain {
         }
         Files.createDirectory(Paths.get(PATH + name));
         map.keySet().forEach(session -> toFile(session, map.get(session), name));
+        System.out.println(name + " processed");
     }
 
     private static void toFile(String session, List<String[]> strings, String folder) {
@@ -87,9 +88,9 @@ public class ExtremeMain {
         try (Stream<String> stream = Files.lines(path)) {
             return stream.map(s -> s.split(","))
                     .filter(arr -> arr.length == 6 && Utils.isLong(arr[3]) && Utils.isLong(arr[4]))
-                    .skip(1000) //TODO skip some first bad results
+                    .skip(2000) //TODO skip some first bad results
                     // to reduce sorting time
-                    .filter(arr -> new Long(arr[4]) > 100)
+                    .filter(arr -> new Long(arr[4]) > 200)
                     .sorted( Comparator.comparing(s -> (- new Long(s[4]) ) ) )
                     // almost session count
                     .limit(20)
