@@ -6,7 +6,7 @@ package iponom.logprocessor;
  */
 public interface Utils {
 
-    String PREFIX = "results/2018-06-25-1/";
+    String PREFIX = "results/2018-06-28-3/";
 
     static boolean isLong(String str) {
         try {
@@ -15,6 +15,12 @@ public interface Utils {
         } catch(NumberFormatException nfe) {
             return false;
         }
+    }
+
+    static long getSkipCount(String logFile, long base) {
+        if (logFile.startsWith("client"))  return base;
+        else if (logFile.startsWith("SERVER"))  return base / 3;
+        else return base / 9;
     }
 
 }

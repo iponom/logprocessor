@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static iponom.logprocessor.Utils.PREFIX;
+import static iponom.logprocessor.Utils.getSkipCount;
 import static iponom.logprocessor.Utils.isLong;
 
 /**
@@ -24,7 +25,7 @@ public class ShortMain {
         String firstLine;
         String lastLine;
 
-        public Container(String name) {
+        Container(String name) {
             this.name = name;
         }
 
@@ -84,7 +85,7 @@ public class ShortMain {
         Path path = Paths.get(PATH + logFile);
         try (Stream<String> stream = Files.lines(path)) {
             List<Long> list = stream
-                    .skip(2000) // TODO remove ?
+                    .skip(getSkipCount(logFile, 1200))
                     .map(s -> s.split(","))
                     .filter(arr -> arr.length == 6 && "1".equals(arr[5]) && isLong(arr[3]) && isLong(arr[4]) && new Long(arr[4]) > 200) //arr.length == 6 &&
                     .map(arr -> new Long(arr[4]))
@@ -109,5 +110,6 @@ public class ShortMain {
             return container;
         }
     }
+
 
 }

@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import iponom.logprocessor.Utils;
 
 import static iponom.logprocessor.Utils.PREFIX;
+import static iponom.logprocessor.Utils.getSkipCount;
 
 /**
  * @author Ilya.Ponomarev
@@ -88,7 +89,7 @@ public class ExtremeMain {
         try (Stream<String> stream = Files.lines(path)) {
             return stream.map(s -> s.split(","))
                     .filter(arr -> arr.length == 6 && Utils.isLong(arr[3]) && Utils.isLong(arr[4]))
-                    .skip(2000) //TODO skip some first bad results
+                    .skip(getSkipCount(name, 1200)) //skip some first bad results
                     // to reduce sorting time
                     .filter(arr -> new Long(arr[4]) > 200)
                     .sorted( Comparator.comparing(s -> (- new Long(s[4]) ) ) )
