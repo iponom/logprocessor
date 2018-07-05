@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static iponom.logprocessor.Utils.PREFIX;
-
 /**
  *
  * @author Ilya.Ponomarev
@@ -17,37 +15,38 @@ import static iponom.logprocessor.Utils.PREFIX;
  */
 public class ClientMain {
 
-    private static final String SEP = ";";
-    private static final String PATH = PREFIX + "result/";
 
     public static void main(String[] args) throws IOException {
-        Stream<String> result = navigate(Paths.get(PATH));
+        String str = args.length > 0 ? args[0] : "";
+        Path root = Paths.get(str + "/result/");
+        Stream<String> result = navigate(root, root);
         //result.forEach(System.out::println);
         String caption = String.format("%-90s%13s%13s%13s%13s%13s", " file", "average", "max", "total count", "> 200 count", "> 200 %");
-        Files.write(Paths.get(PATH + "/../out.csv"), Stream.concat(result.filter(s -> !s.endsWith("0            0     0,000000")), Stream.of(caption)).sorted().collect(Collectors.toList()));
+        Files.write(Paths.get(root + "/../out.csv"), Stream.concat(result.filter(s -> !s.isEmpty()), Stream.of(caption)).sorted().collect(Collectors.toList()));
     }
 
-    private static Stream<String> navigate(Path path) {
+    private static Stream<String> navigate(Path path, Path root) {
         if (Files.isDirectory(path)) {
             try {
-                return Files.list(path).flatMap(ClientMain::navigate);
+                return Files.list(path).flatMap(p -> ClientMain.navigate(p, root));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         } else {
-            return Stream.of(run(path));
+            return Stream.of(run(path, root));
         }
     }
 
     // 0. Time, 1. Number, 2. Average, 3. Max, 4. <200, 5. 200+, 6. 95.0, 7. 99.0, 8. 99.9
-    private static String run(Path path) {
-        String str = Paths.get(PATH).relativize(path).toString();
+    private static String run(Path path, Path root) {
+        String str = root.relativize(path).toString();
         try (Stream<String> stream = Files.lines(path)) {
             //skip header and first 25 lines
             List<String[]> list = stream.skip(26).map(s -> s.split(",")).collect(Collectors.toList());
             long totalCount = list.stream()
                     .filter(arr -> isNumber(arr[1]))
                     .map(arr -> new Long(arr[1])).collect(Collectors.summingLong(Long::longValue));
+            if (totalCount == 0) return "";
             long moreThan200Count = list.stream()
                     .filter(arr -> isNumber(arr[5]))
                     .map(arr -> new Long(arr[5])).collect(Collectors.summingLong(Long::longValue));
@@ -72,4 +71,5 @@ public class ClientMain {
             return false;
         }
     }
+
 }
