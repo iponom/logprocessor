@@ -23,7 +23,8 @@ public class ClientMain {
     public static void main(String[] args) throws IOException {
         Stream<String> result = navigate(Paths.get(PATH));
         //result.forEach(System.out::println);
-        Files.write(Paths.get(PATH + "/../out.csv"), result.filter(s -> !s.endsWith(";0;0;0.0;0.0")).collect(Collectors.toList()));
+        String caption = String.format("%-90s%13s%13s%13s%13s%13s", " file", "average", "max", "total count", "> 200 count", "> 200 %");
+        Files.write(Paths.get(PATH + "/../out.csv"), Stream.concat(result.filter(s -> !s.endsWith("0            0     0,000000")), Stream.of(caption)).sorted().collect(Collectors.toList()));
     }
 
     private static Stream<String> navigate(Path path) {
@@ -42,7 +43,8 @@ public class ClientMain {
     private static String run(Path path) {
         String str = Paths.get(PATH).relativize(path).toString();
         try (Stream<String> stream = Files.lines(path)) {
-            List<String[]> list = stream.skip(1).map(s -> s.split(",")).collect(Collectors.toList());
+            //skip header and first 25 lines
+            List<String[]> list = stream.skip(26).map(s -> s.split(",")).collect(Collectors.toList());
             long totalCount = list.stream()
                     .filter(arr -> isNumber(arr[1]))
                     .map(arr -> new Long(arr[1])).collect(Collectors.summingLong(Long::longValue));
@@ -55,8 +57,8 @@ public class ClientMain {
             Double max = list.stream()
                     .filter(arr -> isNumber(arr[3]))
                     .map(arr -> new Double(arr[3])).max(Double::compareTo).orElseGet(() -> 0D);
-            long moreThan20Percent = totalCount > 0 ? moreThan200Count * 100 / totalCount : 0;
-            return  str + SEP + totalCount + SEP + moreThan200Count + SEP + average + SEP + max + SEP + moreThan20Percent;
+            Double moreThan20Percent = totalCount > 0 ? moreThan200Count * 100 / new Double(totalCount) : 0;
+            return  String.format("%-90s%13f%13f%13d%13d%13f", str, average, max, totalCount, moreThan200Count, moreThan20Percent);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
