@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static iponom.logprocessor.Utils.PREFIX;
+
 /**
  *
  * @author Ilya.Ponomarev
@@ -17,12 +19,19 @@ public class ClientMain {
 
 
     public static void main(String[] args) throws IOException {
-        String str = args.length > 0 ? args[0] : "";
-        Path root = Paths.get(str + "/result/");
+        String str = PREFIX;
+        if (args.length > 0) {
+            str =  args[0];
+            if (!str.endsWith("/") && !(str.endsWith("\\"))) {
+                str = str + "/";
+            }
+        }
+        Path root = Paths.get(str + "result/");
         Stream<String> result = navigate(root, root);
         //result.forEach(System.out::println);
         String caption = String.format("%-90s%13s%13s%13s%13s%13s", " file", "average", "max", "total count", "> 200 count", "> 200 %");
-        Files.write(Paths.get(root + "/../out.csv"), Stream.concat(result.filter(s -> !s.isEmpty()), Stream.of(caption)).sorted().collect(Collectors.toList()));
+        Files.write(Paths.get(root + "/../rest-client-report.txt"), Stream.concat(result.filter(s -> !s.isEmpty()), Stream.of(caption)).sorted().collect(Collectors.toList()));
+        System.out.println("Created rest-client-report.txt");
     }
 
     private static Stream<String> navigate(Path path, Path root) {

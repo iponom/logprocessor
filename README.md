@@ -33,7 +33,7 @@ logback example
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
         <file>./client.log</file>
         <encoder>
-            <pattern>CLIENT-00,%thread,%msg%n</pattern>
+            <pattern>%msg%n</pattern>
         </encoder>
     </appender>
     <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
@@ -47,3 +47,10 @@ logback example
     <logger name="iponom.profiler" level="trace"/>
 </configuration>
 ```
+
+Summary report for rest client results
+
+* Run once `mvn clean package` or `mvn clean compile`.
+* Run `mvn exec:java -Dexec.mainClass="iponom.logprocessor.client.ClientMain" -Dexec.args="d:/temp/"`
+where -Dexec.args is a path to the `result` directory. Don't include and don't rename `result`.
+   

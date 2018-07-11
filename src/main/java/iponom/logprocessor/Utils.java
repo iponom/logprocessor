@@ -6,7 +6,8 @@ package iponom.logprocessor;
  */
 public interface Utils {
 
-    String PREFIX = "results/2018-06-28-3/";
+    String PREFIX = "./";
+    int BASE = 1200;
 
     static boolean isLong(String str) {
         try {

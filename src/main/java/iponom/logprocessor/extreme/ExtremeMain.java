@@ -20,11 +20,11 @@ import static iponom.logprocessor.Utils.getSkipCount;
 public class ExtremeMain {
 
     /*
-    0 node
-    1 thread
-    2 id
-    3 timestamp
-    4 interval
+    0 file - added dynamically
+    1 id
+    2 timestamp
+    3 interval
+    4 number
      */
 
     private static final String PATH = PREFIX + "log/";
@@ -34,6 +34,7 @@ public class ExtremeMain {
     private static final String[] STORAGES = {"STORAGE-1", "STORAGE-2", "STORAGE-3", "STORAGE-4", "STORAGE-5", "STORAGE-6", "STORAGE-7", "STORAGE-8", "STORAGE-9"};
 
     private static final List<String> ALL_LOGS = new ArrayList<>();
+
     static {
         ALL_LOGS.add(CLIENT);
         ALL_LOGS.addAll(Arrays.asList(SERVICES));
@@ -41,9 +42,10 @@ public class ExtremeMain {
     }
 
     public static void main(String[] args) throws Exception {
-        for (String name : ALL_LOGS) {
-            processMaxSessionsFromFile(name);
-        }
+        processMaxSessionsFromFile(CLIENT);
+//        for (String name : ALL_LOGS) {
+//            processMaxSessionsFromFile(name);
+//        }
     }
 
     private static void processMaxSessionsFromFile(String name) throws Exception {
@@ -64,12 +66,12 @@ public class ExtremeMain {
         System.out.println(name + " processed");
     }
 
-    private static void toFile(String session, List<String[]> strings, String folder) {
+    private static void toFile(String session, List<String[]> strings, String name) {
         Stream<String> result = strings.stream()
-                .sorted(Comparator.comparing(arr -> new Long(arr[3]) ) )
-                .map(arr -> arr[0] + "," + arr[3] + "," + arr[4]+ "," + (arr.length == 6 ? arr[5] : "1"));
+                .sorted(Comparator.comparing(arr -> new Long(arr[2]) ) )
+                .map(arr -> arr[0] + "," + arr[2] + "," + arr[3]+ "," + arr[4]);
         try {
-            Files.write(Paths.get(PATH  + folder + "/" + session + ".log"), (Iterable<String>)result::iterator);
+            Files.write(Paths.get(PATH  + name + "/" + session + ".log"), (Iterable<String>)result::iterator);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -78,9 +80,9 @@ public class ExtremeMain {
     private static Map<String, List<String[]>> processSessions(Collection sessions, String log) throws Exception {
         Path path = Paths.get(PATH + log);
         try (Stream<String> stream = Files.lines(path)) {
-            return stream.map(s -> s.split(","))
-                    .filter(arr -> sessions.contains(arr[2])) //arr.length == 6 &&
-                    .collect(Collectors.groupingBy((String[] arr) -> arr[2]));
+            return stream.map(s -> log + "," + s).map(s -> s.split(","))
+                    .filter(arr -> sessions.contains(arr[1])) //arr.length == 6 &&
+                    .collect(Collectors.groupingBy((String[] arr) -> arr[1]));
         }
     }
 
@@ -88,31 +90,18 @@ public class ExtremeMain {
         Path path = Paths.get(PATH + name + ".log");
         try (Stream<String> stream = Files.lines(path)) {
             return stream.map(s -> s.split(","))
-                    .filter(arr -> arr.length == 6 && Utils.isLong(arr[3]) && Utils.isLong(arr[4]))
-                    .skip(getSkipCount(name, 1200)) //skip some first bad results
+                    .filter(arr -> arr.length == 4 && Utils.isLong(arr[1]) && Utils.isLong(arr[2]))
+                    .skip(getSkipCount(name, Utils.BASE)) //skip some first bad results
                     // to reduce sorting time
-                    .filter(arr -> new Long(arr[4]) > 200)
-                    .sorted( Comparator.comparing(s -> (- new Long(s[4]) ) ) )
+                    .filter(arr -> new Long(arr[2]) > 500) // get all intervals more then 500 ms
+                    .sorted( Comparator.comparing(s -> (- new Long(s[2]) ) ) )
                     // almost session count
                     .limit(20)
                     // map to print
                     //.map(arr ->  "1" + "," + arr[2] + "," + arr[3] + "," + arr[4])
-                    .map(arr ->  arr[2])
+                    .map(arr ->  arr[0])
                     //.distinct()
                     .collect(Collectors.toSet());
-
-        }
-    }
-
-    // remove thread column
-    private static void trim() throws Exception {
-        Path path = Paths.get(PATH + CLIENT);
-        try (Stream<String> stream = Files.lines(path)) {
-            Stream<String> result = stream
-                    //.map(s -> s.split(","))
-                    //.filter(arr -> arr.length == 6 && isLong(arr[3]) && isLong(arr[4]))
-                    .map(str -> str.replace("client,$", "CLIENT-00,"));
-            Files.write(Paths.get(PATH + "client1.log"), (Iterable<String>)result::iterator);
 
         }
     }
